@@ -16,17 +16,15 @@ class controller {
     }
     async getstudentData(req, res) {
         console.log("Get student Data");
-        // res.send("get data");
-        // pool.query(queries.getStudents, (error,data)=>{
-        //     if(error) throw error
-        //     res.status(200).json(data.rows)
-        // })
         try {
-            let studentData = await pool.query(queries.getStudents)
-            if (studentData) {
+            // let studentData = await pool.query(queries.getStudents)
+            let studentData = await Student.findAll()
+            console.log(studentData,'studentData');
+
+            if (studentData !== null ) {
                 res.status(200).json({
                     message: "students found",
-                    data: studentData.rows,
+                    data: studentData,
                     status: 200
                 })
             } else {
@@ -44,13 +42,16 @@ class controller {
     }
     async student(req, res) {
         try {
+
             const id = parseInt(req.params.id);
-            const student = await pool.query(queries.getStudentById, [id]);
-            console.log(student.rowCount);
-            if (student && student.rowCount > 0) {
+
+            const getStudentById = await Student.findOne({ where: { id: id } });
+
+            console.log(getStudentById, 'zzzzz');
+            if (getStudentById !== null && getStudentById.dataValues.id > 0) {
                 res.status(200).json({
                     message: "student found with this Id",
-                    data: student.rows[0],
+                    data: getStudentById.dataValues,
                     status: 200
                 })
             } else {
@@ -62,6 +63,7 @@ class controller {
                 })
 
             }
+
         } catch (error) {
             console.log("student ERROR :", error);
         }
@@ -71,52 +73,71 @@ class controller {
     async addStudent(req, res) {
         try {
             const { firstname, lastname, email } = req.body;
-            // const checkEmailExists = await Student.findOne({where: {email: email}})
-            // console.log(checkEmailExists,"zzzzzzzzz");
-            const jane = await Student.create({ firstName: "Jane",lastName:"dos",email:"jane@dos.com" });
-            // Jane exists in the database now!
-            console.log(jane instanceof Student); // true
-            console.log(jane.firstName); // "Jane"
+            const checkEmailExists = await Student.findOne({ where: { email: email } })
+            // console.log(checkEmailExists, "zzzzzzzzz");
+            if (checkEmailExists !== null && checkEmailExists.dataValues.id >= 0) {
+                console.log("checkEmailExists.dataValues", checkEmailExists.dataValues);
+                return res.status(400).json({
+                    message: "Email is allready Exists",
+                    data: checkEmailExists.dataValues,
+                    status: 400
+                })
+            } else {
+                // console.log("Else part");
+                const StudentData = await Student.create({ firstName: firstname, lastName: lastname, email: email });
+                // StudentData exists in the database now!
+                // console.log(StudentData instanceof Student); // true
+                // console.log(StudentData.firstName); 
+                if (StudentData) {
+                    return res.status(200).json({
+                        message: "Student Data Submitted",
+                        data: StudentData,
+                        status: 200
+                    })
+                } else {
+                    return res.status(400).json({
+                        message: "Student Data is not Submitted",
+                        data: {},
+                        status: 400
+                    })
+                }
+            }
 
         } catch (error) {
             console.log("addStudent Error", error);
         }
     }
 
-    // async addStudent(req, res) {
-    //     try {
-    //         const { firstname, lastname, email } = req.body;
-    //         console.log(req.body);
-    //         const checkEmailExists = await pool.query(queries.checkEmailExists, [email])
+    async deleteStudent(req,res){
+        const id = parseInt(req.params.id);
+        const student = await Student.findOne({where:{id:id}});
 
-    //         console.log(checkEmailExists);
-    //         if (checkEmailExists.rows.length == 0 && checkEmailExists.rowCount == 0) {
-    //             // ADD STUDENT DATA
-    //             // console.log(queries,'queryyyyyyyyy');
-    //             // pool.query(queries.addStudent,[firstname,lastname,email,createdAt,updatedAt],(err,result)=>{
-    //             //   if(err) throw err;
-    //             const saveStudent=await Student.create({
-    //                 firstname:firstname,
-    //                 lastname:lastname,
-    //                 email:email
-    //             })
-    //               res.status(200).send({
-    //                 message:"Student Created Successfully!",
-    //                 data:saveStudent,
-    //                 status:200
-    //               })  
-    //             // })
-    //         }else{
-    //            return res.status(400).json({
-    //                 message: "Email is allready Exists",
-    //                 data: checkEmailExists.rows[0],
-    //                 status: 400
-    //             })
-    //         }
-    //     } catch (error) {
-    //         console.log("Add Student Error :", error);
-    //     }
-    // }
+        // console.log("student",student);
+        if(student!==null && student.dataValues.id>0){
+            console.log("if part");
+            const deleteStudent = await Student.destroy({where:{id:id}})
+            if(deleteStudent){
+                return res.status(200).json({
+                message:"Student is Deleted",
+                data:deleteStudent,
+                status:200
+            })
+            }else{
+                return res.status(400).json({
+                    message:"Student is Not Deleted",
+                    data:{},
+                    status:400
+                })
+            }
+        }else{
+            return res.status(400).json({
+                message:"Cann't find Student With This Id",
+                data:{},
+                status:400
+            })
+        }
+    }
+
 }
 
 // EXPORTS 

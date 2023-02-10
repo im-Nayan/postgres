@@ -11,6 +11,7 @@ const route = express.Router();
 route.get('/',controller.index)
 route.get('/getstudentData',controller.getstudentData)
 route.get('/student/:id',controller.student);
+route.get('/deleteStudent/:id',controller.deleteStudent);
 
 
 //POST METHODS 

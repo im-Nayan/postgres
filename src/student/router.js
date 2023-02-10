@@ -16,6 +16,7 @@ route.get('/deleteStudent/:id',controller.deleteStudent);
 
 //POST METHODS 
 route.post('/addStudent',response_post,controller.addStudent)
+route.post('/updateStudent',response_post,controller.updateStudent)
 
 
 

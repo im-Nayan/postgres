@@ -19,9 +19,9 @@ class controller {
         try {
             // let studentData = await pool.query(queries.getStudents)
             let studentData = await Student.findAll()
-            console.log(studentData,'studentData');
+            console.log(studentData, 'studentData');
 
-            if (studentData !== null ) {
+            if (studentData !== null) {
                 res.status(200).json({
                     message: "students found",
                     data: studentData,
@@ -108,32 +108,65 @@ class controller {
         }
     }
 
-    async deleteStudent(req,res){
+    async deleteStudent(req, res) {
         const id = parseInt(req.params.id);
-        const student = await Student.findOne({where:{id:id}});
+        const student = await Student.findOne({ where: { id: id } });
 
         // console.log("student",student);
-        if(student!==null && student.dataValues.id>0){
+        if (student !== null && student.dataValues.id > 0) {
             console.log("if part");
-            const deleteStudent = await Student.destroy({where:{id:id}})
-            if(deleteStudent){
+            const deleteStudent = await Student.destroy({ where: { id: id } })
+            if (deleteStudent) {
                 return res.status(200).json({
-                message:"Student is Deleted",
-                data:deleteStudent,
-                status:200
-            })
-            }else{
+                    message: "Student is Deleted",
+                    data: deleteStudent,
+                    status: 200
+                })
+            } else {
                 return res.status(400).json({
-                    message:"Student is Not Deleted",
-                    data:{},
-                    status:400
+                    message: "Student is Not Deleted",
+                    data: {},
+                    status: 400
                 })
             }
-        }else{
+        } else {
             return res.status(400).json({
-                message:"Cann't find Student With This Id",
-                data:{},
-                status:400
+                message: "Cann't find Student With This Id",
+                data: {},
+                status: 400
+            })
+        }
+    }
+
+    async updateStudent(req, res) {
+        const id = parseInt(req.body.id);
+        const student = await Student.findOne({ where: { id: id } });
+
+        // console.log("student",student);
+        if (student !== null && student.dataValues.id > 0) {
+            const updateStudent = await Student.update({firstName:req.body.firstName,lastName:req.body.lastName,email:req.body.email},{where:{
+                id:id
+            }})
+            // console.log("updateStudent",updateStudent);
+            if (updateStudent) {
+                return res.status(200).json({
+                    message: "Student is Updated",
+                    data: updateStudent,
+                    status: 200
+                })
+            } else {
+                return res.status(400).json({
+                    message: "Student is Not Updated",
+                    data: {},
+                    status: 400
+                })
+            }
+
+        } else {
+            return res.status(400).json({
+                message: "Cann't find Student With This Id",
+                data: {},
+                status: 400
             })
         }
     }

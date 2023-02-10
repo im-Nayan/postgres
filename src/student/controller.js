@@ -1,6 +1,15 @@
 const pool = require('../../database/db');
 const queries = require('./queries');
 
+
+const Sequelize = require('sequelize');
+const { Student } = require('../../models');
+// const sequelize = require('../../config/database.json').sequelize;
+
+// Bring in Model
+// const student=require("../../models/students")(students, Sequelize.DataTypes,
+//      Sequelize.Model)
+
 class controller {
     async index(req, res) {
         res.send("using api route");
@@ -46,7 +55,7 @@ class controller {
                 })
             } else {
                 console.log("Not student found with this Id");
-               return res.status(400).json({
+                return res.status(400).json({
                     message: "Not student found with this Id",
                     data: {},
                     status: 400
@@ -61,31 +70,53 @@ class controller {
 
     async addStudent(req, res) {
         try {
-            const { firstName, lastName, email } = req.body;
-            // console.log(req.body);
-            const checkEmailExists = await pool.query(queries.checkEmailExists, [email])
-            // console.log(checkEmailExists);
-            if (checkEmailExists.rows.length == 0 && checkEmailExists.rowCount == 0) {
-                // ADD STUDENT DATA
-                pool.query(queries.addStudent,[firstName,lastName,email],(err,result)=>{
-                  if(err) throw err;
-                  res.status(200).send({
-                    message:"Student Created Successfully!",
-                    data:result,
-                    status:200
-                  })  
-                })
-            }else{
-               return res.status(400).json({
-                    message: "Email is allready Exists",
-                    data: checkEmailExists.rows[0],
-                    status: 400
-                })
-            }
+            const { firstname, lastname, email } = req.body;
+            // const checkEmailExists = await Student.findOne({where: {email: email}})
+            // console.log(checkEmailExists,"zzzzzzzzz");
+            const jane = await Student.create({ firstName: "Jane",lastName:"dos",email:"jane@dos.com" });
+            // Jane exists in the database now!
+            console.log(jane instanceof Student); // true
+            console.log(jane.firstName); // "Jane"
+
         } catch (error) {
-            console.log("Add Student Error :", error);
+            console.log("addStudent Error", error);
         }
     }
+
+    // async addStudent(req, res) {
+    //     try {
+    //         const { firstname, lastname, email } = req.body;
+    //         console.log(req.body);
+    //         const checkEmailExists = await pool.query(queries.checkEmailExists, [email])
+
+    //         console.log(checkEmailExists);
+    //         if (checkEmailExists.rows.length == 0 && checkEmailExists.rowCount == 0) {
+    //             // ADD STUDENT DATA
+    //             // console.log(queries,'queryyyyyyyyy');
+    //             // pool.query(queries.addStudent,[firstname,lastname,email,createdAt,updatedAt],(err,result)=>{
+    //             //   if(err) throw err;
+    //             const saveStudent=await Student.create({
+    //                 firstname:firstname,
+    //                 lastname:lastname,
+    //                 email:email
+    //             })
+    //               res.status(200).send({
+    //                 message:"Student Created Successfully!",
+    //                 data:saveStudent,
+    //                 status:200
+    //               })  
+    //             // })
+    //         }else{
+    //            return res.status(400).json({
+    //                 message: "Email is allready Exists",
+    //                 data: checkEmailExists.rows[0],
+    //                 status: 400
+    //             })
+    //         }
+    //     } catch (error) {
+    //         console.log("Add Student Error :", error);
+    //     }
+    // }
 }
 
 // EXPORTS 
